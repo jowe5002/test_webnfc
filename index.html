@@ -1,31 +1,46 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>test_webnfc</title>
+  <meta charset="UTF-8">
+  <title>NFC-Tag Scanner</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    #output { margin-top: 20px; font-size: 1.2em; color: darkgreen; }
+  </style>
 </head>
 <body>
-    <script>
-            if ('NDEFReader' in window) {
-    alert("NFC Reader gefunden")
-  }
-        else {
-        document.write("Kein NFC Reader gefundnen")
-        }
+  <h1>NFC-Tag scannen</h1>
+  <button id="scanBtn">Jetzt scannen</button>
+  <div id="output">Noch nichts gescannt.</div>
 
-        const ndef = new NDEFReader();
-ndef.scan().then(() => {
-  document.write("Scan started successfully.");
-  ndef.onreadingerror = () => {
-    document.write("Cannot read data from the NFC tag. Try another one?");
-  };
-  ndef.onreading = event => {
-    document.write("NDEF message read.");
-  };
-}).catch(error => {
-  document.write(`Error! Scan failed to start: ${error}.`);
-});
-    </script>
+  <script>
+    const button = document.getElementById('scanBtn');
+    const output = document.getElementById('output');
+
+    button.addEventListener('click', async () => {
+      if ('NDEFReader' in window) {
+        try {
+          const ndef = new NDEFReader();
+          await ndef.scan();
+          output.textContent = "Scanne NFC-Tag...";
+
+          ndef.onreading = event => {
+            const { serialNumber, message } = event;
+            output.innerHTML = `<strong>Seriennummer:</strong> ${serialNumber}<br>`;
+
+            for (const record of message.records) {
+              const text = new TextDecoder().decode(record.data);
+              output.innerHTML += `<strong>Daten:</strong> ${text}<br>`;
+            }
+          };
+
+        } catch (error) {
+          output.textContent = "Fehler beim Scannen: " + error;
+        }
+      } else {
+        output.textContent = "WebNFC wird von deinem Browser nicht unterstützt.";
+      }
+    });
+  </script>
 </body>
 </html>
