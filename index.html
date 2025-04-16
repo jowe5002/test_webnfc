@@ -13,6 +13,19 @@
         else {
         document.write("Kein NFC Reader gefundnen")
         }
+
+        const ndef = new NDEFReader();
+ndef.scan().then(() => {
+  document.write("Scan started successfully.");
+  ndef.onreadingerror = () => {
+    document.write("Cannot read data from the NFC tag. Try another one?");
+  };
+  ndef.onreading = event => {
+    document.write("NDEF message read.");
+  };
+}).catch(error => {
+  document.write(`Error! Scan failed to start: ${error}.`);
+});
     </script>
 </body>
 </html>
